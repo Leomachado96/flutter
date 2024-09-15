@@ -18,32 +18,37 @@ class _FormTasksState extends State<FormTasks> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  String _priority = 'Baixa';
+
   @override
   void initState() {
+    super.initState();
     if (widget.task != null) {
       _titleController.text = widget.task!.title!;
-
       _descriptionController.text = widget.task!.description!;
+      _priority = widget.task!.priority ?? 'Baixa';
     }
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isEditing = widget.task != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Criar Tarefa'),
+        title: Text(isEditing ? 'Editar Tarefa' : 'Criar Tarefa'),
       ),
       body: Form(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                  label: const Text('Título da Tarefa'),
+                  labelText: 'Título da Tarefa',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -61,11 +66,53 @@ class _FormTasksState extends State<FormTasks> {
                 keyboardType: TextInputType.multiline,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  label: const Text('Descrição da Tarefa'),
+                  labelText: 'Descrição da Tarefa',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
+              ),
+              const SizedBox(height: 20),
+              Text('Prioridade'),
+              Row(
+                children: [
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: const Text('Baixa'),
+                      value: 'Baixa',
+                      groupValue: _priority,
+                      onChanged: (value) {
+                        setState(() {
+                          _priority = value!;
+                        });
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: const Text('Média'),
+                      value: 'Média',
+                      groupValue: _priority,
+                      onChanged: (value) {
+                        setState(() {
+                          _priority = value!;
+                        });
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: const Text('Alta'),
+                      value: 'Alta',
+                      groupValue: _priority,
+                      onChanged: (value) {
+                        setState(() {
+                          _priority = value!;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -74,20 +121,25 @@ class _FormTasksState extends State<FormTasks> {
                     String title = _titleController.text;
                     String description = _descriptionController.text;
 
-                    if (widget.task != null && widget.index != null) {
+                    if (isEditing && widget.index != null) {
                       await taskService.editTask(
-                          widget.index!, title, description, false);
+                          widget.index!, title, description, false, _priority);
                     } else {
-                      await taskService.saveTask(title, description);
+                      await taskService.saveTask(title, description, _priority);
                     }
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Tarefa salva com sucesso!')),
+                      SnackBar(
+                        content: Text(isEditing
+                            ? 'Tarefa alterada com sucesso!'
+                            : 'Tarefa salva com sucesso!'),
+                      ),
                     );
+
+                    Navigator.pop(context, true);
                   }
                 },
-                child: const Text('Salvar Tarefa'),
+                child: Text(isEditing ? 'Alterar Tarefa' : 'Salvar Tarefa'),
               ),
             ],
           ),
