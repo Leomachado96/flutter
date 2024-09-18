@@ -59,7 +59,7 @@ class _MyWidgetState extends State<MyWidget> {
         )),
         body: Stack(
           children: [
-            Text('Tela Inicial'),
+            Center(child: Text('Tela Inicial')),
             Padding(
                 padding: EdgeInsets.only(bottom: 20, left: 10, right: 20),
                 child: Align(
